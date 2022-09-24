@@ -1,14 +1,16 @@
 import { Entypo } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
-import { FlatList, Image, TouchableOpacity, View, Text } from "react-native";
+import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { RouteParams } from "../../@types/navigation";
 import logo from "../../assets/logo-nlw-esports.png";
 import { AdCard, AdCardProps } from "../../components/AdCard";
 import { Background } from "../../components/Background";
+import { DuoMatch } from "../../components/DuoMatch";
 import { Heading } from "../../components/Heading";
+import { getAdsByGame, getDiscordByAd } from "../../services/api";
 import { THEME } from "../../theme";
 import { styles } from "./styles";
 
@@ -18,17 +20,14 @@ export function Game() {
 
   const game = route.params as RouteParams;
   const [ads, setAds] = useState<AdCardProps[]>([]);
+  const [adSelected, setAdSelected] = useState("");
 
   function handleGoBack() {
     navigator.goBack();
   }
 
   useEffect(() => {
-    fetch(`http://192.168.0.2:3333/games/${game.id}/ads`)
-      .then((res) => res.json())
-      .then((data) => setAds(data))
-      .then(() => console.log(ads))
-      .catch((err) => console.log(err));
+    getAdsByGame(game.id, setAds);
   }, []);
 
   return (
@@ -60,10 +59,23 @@ export function Game() {
           keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => <AdCard data={item} onConnect={() => {}} />}
+          renderItem={({ item }) => (
+            <AdCard
+              data={item}
+              onConnect={() => {
+                getDiscordByAd(item.id, setAdSelected);
+              }}
+            />
+          )}
           ListEmptyComponent={() => (
             <Text style={styles.emptyList}>Não há anúncios</Text>
           )}
+        />
+
+        <DuoMatch
+          visible={adSelected.length > 0}
+          discord="Will#123"
+          onPressIcon={() => setAdSelected("")}
         />
       </SafeAreaView>
     </Background>

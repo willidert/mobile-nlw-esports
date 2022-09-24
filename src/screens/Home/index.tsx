@@ -7,6 +7,7 @@ import logoPng from "../../assets/logo-nlw-esports.png";
 import { Background } from "../../components/Background";
 import { GameCard, GameCardProps } from "../../components/GameCard";
 import { Heading } from "../../components/Heading";
+import { getGames } from "../../services/api";
 import { styles } from "./styles";
 
 export function Home() {
@@ -14,11 +15,7 @@ export function Home() {
   const navigation = useNavigation();
 
   useEffect(() => {
-    fetch("http://192.168.0.2:3333/games")
-      .then((response) => response.json())
-      .then((data) => setGames(data))
-      .then(() => console.log(games))
-      .catch((err) => console.log(err));
+    getGames(setGames);
   }, []);
 
   function handleOpenGame({ id, title, bannerUrl }: GameCardProps) {
